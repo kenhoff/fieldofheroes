@@ -1,6 +1,7 @@
 express = require("express")
 parseString = require("xml2js").parseString
 bodyParser = require("body-parser")
+sanitizeHtml = require("sanitize-html")
 
 BasicHttpBinding = require("wcf.js").BasicHttpBinding
 Proxy = require('wcf.js').Proxy
@@ -10,38 +11,45 @@ proxy = new Proxy(binding, process.env.BINDING_API)
 
 app = express()
 
+app.set("view engine", "jade")
+
 app.use(bodyParser.urlencoded({extended:false}))
+
+app.get("/", function (req, res) {
+	res.send(200)
+})
+
+app.get("/favicon.ico", function (req, res) {
+	res.send(200)
+})
 
 app.get("/:heroId", function (req, res) {
 
-	console.log(req.params.heroId)
-
-	message = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><GetRecordFromHeroId xmlns="http://tempuri.org/"><HeroId>' + req.params.heroId + '</HeroId></GetRecordFromHeroId></s:Body></s:Envelope>'
-	// TODO scrub this
-
-	proxy.send(message, "http://tempuri.org/IService1/GetRecordFromHeroId", function(response, ctx) {
-		console.log("got response")
+	message = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><GetRecordFromNameHash xmlns="http://tempuri.org/"><namehash>' + sanitizeHtml(req.params.heroId) + '</namehash></GetRecordFromNameHash></s:Body></s:Envelope>'
+	proxy.send(message, "http://tempuri.org/IService1/GetRecordFromNameHash", function(response, ctx) {
 		console.log(ctx.statusCode)
-	      //console.log(response)
-		parseString(response, function (err, result){
-			soldier = result['s:Envelope']['s:Body'][0]['GetRecordFromHeroIdResponse'][0]['GetRecordFromHeroIdResult'][0]
-			newSoldier = {}
-			keys = Object.keys(soldier)
-			//console.log(keys)
-			for (i = 1; i <= keys.length - 1; i++) {
-				//console.log(keys[i])
-				newKey = keys[i].replace("a:", "")
-				newSoldier[newKey] = soldier[keys[i]][0]
-				//console.log(newSoldier)
-			}
-			delete newSoldier['CustomURL']
-			//delete newSoldier['Success']
-			//console.log("done with loop")
-			console.log(newSoldier)
-			res.json(newSoldier)
-		})
+		if (ctx.statusCode == 500) {
+			res.send(500)
+		}
+		else {
+			parseString(response, function (err, result){
+				if (typeof result['s:Envelope']['s:Body'][0]['GetRecordFromNameHashResponse'][0]['GetRecordFromNameHashResult'][0]["a:NameHashd"][0] != "string") {
+					res.send(404)
+				}
+				else {
+					soldier = result['s:Envelope']['s:Body'][0]['GetRecordFromNameHashResponse'][0]['GetRecordFromNameHashResult'][0]
+					newSoldier = {}
+					keys = Object.keys(soldier)
+					for (i = 1; i <= keys.length - 1; i++) {
+						newKey = keys[i].replace("a:", "")
+						newSoldier[newKey] = soldier[keys[i]][0]
+					}
+					delete newSoldier['CustomURL']
+					res.render("hero", newSoldier)
+				}
+			})
+		}
 	})
-	console.log("sent message")
 
 })
 
