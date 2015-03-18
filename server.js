@@ -39,6 +39,15 @@ app.get("/", function (req, res) {
 					})
 				}
 				console.log(heroesList)
+				/*heroesList.sort(function(a, b){
+					if (a.name < b.name) {
+						return -1
+					}
+					if (a.name > b.name) {
+						return 1
+					}
+					else return 0
+				})*/
 				res.render("allHeroes", {heroesList: heroesList})
 
 			})
