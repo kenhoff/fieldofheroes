@@ -3,6 +3,7 @@ parseString = require("xml2js").parseString
 bodyParser = require("body-parser")
 sanitizeHtml = require("sanitize-html")
 request = require("request")
+qr = require("qr-image")
 
 BasicHttpBinding = require("wcf.js").BasicHttpBinding
 Proxy = require('wcf.js').Proxy
@@ -29,8 +30,25 @@ app.get("/", function (req, res) {
 		}
 		else {
 			parseString(response, function (err, result){
-				console.log(result['s:Envelope'])
-				res.send(200)
+				heroes = result['s:Envelope']["s:Body"][0]["GetAllHeroPairsResponse"][0]["GetAllHeroPairsResult"][0]["a:HeroPair"]
+				heroesList = []
+				for (i = 0; i < heroes.length; i++) {
+					heroesList.push( {
+						name: heroes[i]["a:Name"][0],
+						hash: heroes[i]["a:NameHashd"][0]
+					})
+				}
+				console.log(heroesList)
+				/*heroesList.sort(function(a, b){
+					if (a.name < b.name) {
+						return -1
+					}
+					if (a.name > b.name) {
+						return 1
+					}
+					else return 0
+				})*/
+				res.render("allHeroes", {heroesList: heroesList})
 
 			})
 		}
@@ -63,6 +81,7 @@ app.get("/:heroId", function (req, res) {
 						newSoldier[newKey] = soldier[keys[i]][0]
 					}
 					delete newSoldier['CustomURL']
+					newSoldier["DateOfDeath"] = (new Date(Date.parse(newSoldier["DateOfDeath"]))).toDateString()
 					console.log(newSoldier)
 					res.render("hero", newSoldier)
 				}
@@ -74,6 +93,12 @@ app.get("/:heroId", function (req, res) {
 
 app.get("/img/:heroid", function (req, res) {
 	request.get("http://fieldofheroesweb.azurewebsites.net/Service1.svc/images/" + req.params.heroid).pipe(res)
+})
+
+
+app.get("/qr/:heroid", function (req, res) {
+	qr_code = qr.image("http://fieldofheroesweb.azurewebsites.net/" + req.params.heroid)
+	qr_code.pipe(res)
 })
 
 
