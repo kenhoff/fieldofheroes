@@ -92,7 +92,7 @@ app.get("/:heroId", function (req, res) {
 })
 
 app.get("/img/:heroid", function (req, res) {
-	request.get("http://fieldofheroesweb.azurewebsites.net/Service1.svc/images/" + req.params.heroid).pipe(res)
+	request.get("https://fieldofherosimageapi.azurewebsites.net/Service1.svc/images/" + req.params.heroid).pipe(res)
 })
 
 
