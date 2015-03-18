@@ -2,6 +2,7 @@ express = require("express")
 parseString = require("xml2js").parseString
 bodyParser = require("body-parser")
 sanitizeHtml = require("sanitize-html")
+request = require("request")
 
 BasicHttpBinding = require("wcf.js").BasicHttpBinding
 Proxy = require('wcf.js').Proxy
@@ -16,7 +17,24 @@ app.set("view engine", "jade")
 app.use(bodyParser.urlencoded({extended:false}))
 
 app.get("/", function (req, res) {
-	res.send(200)
+	
+
+	message = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Header></s:Header><s:Body><GetAllHeroPairs xmlns="http://tempuri.org/"></GetAllHeroPairs></s:Body></s:Envelope>'
+
+	proxy.send(message, "http://tempuri.org/IService1/GetAllHeroPairs", function(response, ctx) {
+		console.log(ctx.statusCode)
+		console.log(response)
+		if (ctx.statusCode == 500) {
+			res.send(500)
+		}
+		else {
+			parseString(response, function (err, result){
+				console.log(result['s:Envelope'])
+				res.send(200)
+
+			})
+		}
+	})
 })
 
 app.get("/favicon.ico", function (req, res) {
@@ -45,12 +63,17 @@ app.get("/:heroId", function (req, res) {
 						newSoldier[newKey] = soldier[keys[i]][0]
 					}
 					delete newSoldier['CustomURL']
+					console.log(newSoldier)
 					res.render("hero", newSoldier)
 				}
 			})
 		}
 	})
 
+})
+
+app.get("/img/:heroid", function (req, res) {
+	request.get("http://fieldofheroesweb.azurewebsites.net/Service1.svc/images/" + req.params.heroid).pipe(res)
 })
 
 
