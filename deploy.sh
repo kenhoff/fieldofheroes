@@ -101,7 +101,7 @@ selectNodeVersion () {
 echo Handling node.js deployment.
 
 uname -a
-wget ftp://ftp.imagemagick.org/pub/ImageMagick/ImageMagick-6.9.1-0.tar.gz
+curl -O ftp://ftp.imagemagick.org/pub/ImageMagick/ImageMagick-6.9.1-0.tar.gz
 
 # 1. KuduSync
 if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
