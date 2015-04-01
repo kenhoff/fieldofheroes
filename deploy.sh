@@ -108,6 +108,7 @@ export MAGICK_HOME="$HOME/ImageMagick-6.9.1"
 export PATH="$MAGICK_HOME/bin:$PATH"
 LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$MAGICK_HOME/lib"
 export LD_LIBRARY_PATH
+identify logo.jpg
 
 # 1. KuduSync
 if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
