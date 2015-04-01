@@ -101,7 +101,7 @@ selectNodeVersion () {
 echo Handling node.js deployment.
 
 uname -a
-cd $HOME
+pwd
 curl -O ftp://ftp.imagemagick.org/pub/ImageMagick/ImageMagick-6.9.1-0.tar.gz
 tar xvzf ImageMagick-6.9.1-0.tar.gz
 export MAGICK_HOME="$HOME/ImageMagick-6.9.1"
