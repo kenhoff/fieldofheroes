@@ -23,8 +23,8 @@ app.get("/", function (req, res) {
 	message = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Header></s:Header><s:Body><GetAllHeroPairs xmlns="http://tempuri.org/"></GetAllHeroPairs></s:Body></s:Envelope>'
 
 	proxy.send(message, "http://tempuri.org/IService1/GetAllHeroPairs", function(response, ctx) {
-		console.log(ctx.statusCode)
-		console.log(response)
+		//console.log(ctx.statusCode)
+		//console.log(response)
 		if (ctx.statusCode == 500) {
 			res.send(500)
 		}
@@ -38,16 +38,7 @@ app.get("/", function (req, res) {
 						hash: heroes[i]["a:NameHashd"][0]
 					})
 				}
-				console.log(heroesList)
-				/*heroesList.sort(function(a, b){
-					if (a.name < b.name) {
-						return -1
-					}
-					if (a.name > b.name) {
-						return 1
-					}
-					else return 0
-				})*/
+				//console.log(heroesList)
 				res.render("allHeroes", {heroesList: heroesList})
 
 			})
@@ -63,7 +54,7 @@ app.get("/:heroId", function (req, res) {
 
 	message = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><GetRecordFromNameHash xmlns="http://tempuri.org/"><namehash>' + sanitizeHtml(req.params.heroId) + '</namehash></GetRecordFromNameHash></s:Body></s:Envelope>'
 	proxy.send(message, "http://tempuri.org/IService1/GetRecordFromNameHash", function(response, ctx) {
-		console.log(ctx.statusCode)
+		//console.log(ctx.statusCode)
 		if (ctx.statusCode == 500) {
 			res.send(500)
 		}
@@ -82,7 +73,7 @@ app.get("/:heroId", function (req, res) {
 					}
 					delete newSoldier['CustomURL']
 					newSoldier["DateOfDeath"] = (new Date(Date.parse(newSoldier["DateOfDeath"]))).toDateString()
-					console.log(newSoldier)
+					//console.log(newSoldier)
 					res.render("hero", newSoldier)
 				}
 			})
@@ -100,13 +91,6 @@ app.get("/qr/:heroid", function (req, res) {
 	qr_code = qr.image("http://fieldofheroesweb.azurewebsites.net/" + req.params.heroid)
 	qr_code.pipe(res)
 })
-
-
-
-
-
-
-
 
 
 console.log("listening")
