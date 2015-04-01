@@ -104,7 +104,7 @@ uname -a
 pwd
 curl -O ftp://ftp.imagemagick.org/pub/ImageMagick/ImageMagick-6.9.1-0.tar.gz
 tar xvzf ImageMagick-6.9.1-0.tar.gz
-export MAGICK_HOME="$HOME/ImageMagick-6.9.1"
+export MAGICK_HOME="/d/home/site/repository/ImageMagick-6.9.1-0"
 export PATH="$MAGICK_HOME/bin:$PATH"
 LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$MAGICK_HOME/lib"
 export LD_LIBRARY_PATH
