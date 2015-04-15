@@ -5,6 +5,7 @@ bodyParser = require("body-parser")
 sanitizeHtml = require("sanitize-html")
 request = require("request")
 qr = require("qr-image")
+fs = require("fs")
 
 BasicHttpBinding = require("wcf.js").BasicHttpBinding
 Proxy = require('wcf.js').Proxy
@@ -29,18 +30,24 @@ app.get("/", function (req, res) {
 app.get("/qrcodes", function (req, res) {
 	getAllSoldiers(function (heroesList) {
 		//loop through soldiers
-		async.map(heroesList, function (hero, cb){
+		async.map(heroesList.slice(0,10), function (hero, cb){
 			console.log("generating qr code for:", hero)
 			generateQrCode(hero.hash, function (qrCode) {
-
-				cb()
+				// TODO use mkdirp to create qrcodes directory
+				qrPipe = qrCode.pipe(fs.createWriteStream(__dirname + "/qrcodes/" + hero.hash + ".png"))
+				console.log("qrpipe created")
+				qrPipe.on('close', function () {
+					console.log("pipe finished")
+					cb(null)
+				})
 			})
 		}, function (err, results) {
-			console.log("finished")
+			console.log(__dirname + "/qrcodes.zip")
+			res.send(200)
+			
 		})
 		//call qr code gen on each soldier, with each callback saving to file
 		//once complete, response 200
-		res.send(200)
 		//res.render("allHeroes", {heroesList: heroesList})
 	})
 })
@@ -121,7 +128,7 @@ app.get("/qr/:heroID", function (req, res) {
 })
 
 function generateQrCode (heroID, cb) {
-	qr_code = qr.image("http://fieldofheroesweb.azurewebsites.net/" + heroID)
+	qr_code = qr.image("http://fieldofheroesweb.azurewebsites.net/" + heroID, {type: "png"})
 	cb(qr_code)
 }
 
