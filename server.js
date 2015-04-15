@@ -1,3 +1,4 @@
+async = require("async")
 express = require("express")
 parseString = require("xml2js").parseString
 bodyParser = require("body-parser")
@@ -27,6 +28,18 @@ app.get("/", function (req, res) {
 
 app.get("/qrcodes", function (req, res) {
 	getAllSoldiers(function (heroesList) {
+		//loop through soldiers
+		async.map(heroesList, function (hero, cb){
+			console.log("generating qr code for:", hero)
+			generateQrCode(hero.hash, function (qrCode) {
+
+				cb()
+			})
+		}, function (err, results) {
+			console.log("finished")
+		})
+		//call qr code gen on each soldier, with each callback saving to file
+		//once complete, response 200
 		res.send(200)
 		//res.render("allHeroes", {heroesList: heroesList})
 	})
@@ -99,10 +112,18 @@ app.get("/img/:heroid", function (req, res) {
 })
 
 
-app.get("/qr/:heroid", function (req, res) {
-	qr_code = qr.image("http://fieldofheroesweb.azurewebsites.net/" + req.params.heroid)
-	qr_code.pipe(res)
+app.get("/qr/:heroID", function (req, res) {
+	heroID = req.params.heroID
+
+	generateQrCode (heroID, function (qrCode) {
+		qrCode.pipe(res)
+	})
 })
+
+function generateQrCode (heroID, cb) {
+	qr_code = qr.image("http://fieldofheroesweb.azurewebsites.net/" + heroID)
+	cb(qr_code)
+}
 
 
 console.log("listening")
