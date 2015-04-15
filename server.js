@@ -19,7 +19,20 @@ app.use(bodyParser.urlencoded({extended:false}))
 
 app.get("/", function (req, res) {
 	
+	getAllSoldiers(function (heroesList) {
+		res.render("allHeroes", {heroesList: heroesList})
+	})
 
+})
+
+app.get("/qrcodes", function (req, res) {
+	getAllSoldiers(function (heroesList) {
+		res.send(200)
+		//res.render("allHeroes", {heroesList: heroesList})
+	})
+})
+
+function getAllSoldiers (cb) {
 	message = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Header></s:Header><s:Body><GetAllHeroPairs xmlns="http://tempuri.org/"></GetAllHeroPairs></s:Body></s:Envelope>'
 
 	proxy.send(message, "http://tempuri.org/IService1/GetAllHeroPairs", function(response, ctx) {
@@ -39,12 +52,11 @@ app.get("/", function (req, res) {
 					})
 				}
 				//console.log(heroesList)
-				res.render("allHeroes", {heroesList: heroesList})
-
+				cb(heroesList)
 			})
 		}
 	})
-})
+}
 
 app.get("/favicon.ico", function (req, res) {
 	res.send(200)
