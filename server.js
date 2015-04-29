@@ -30,7 +30,7 @@ app.get("/", function (req, res) {
 
 })
 
-app.get("/qrcodes", timeout("600s"), function (req, res) {
+app.get("/generate", timeout("600s"), function (req, res) {
 	getAllSoldiers(function (heroesList) {
 		//loop through soldiers
 		mkdirp(__dirname + "/qrcodes", function (err) {
@@ -48,19 +48,21 @@ app.get("/qrcodes", timeout("600s"), function (req, res) {
 				})
 			}, function (err, results) {
 				console.log("done generating qr codes")
-				console.log(__dirname + "/qrcodes.zip")
-				zipFile = archiver("zip")
-				zipFile.directory("qrcodes")
-
-				zipFile.pipe(res)	
-				res.on('close', function () {
-					res.send(200)
-				})
-				zipFile.finalize()
-				
 			})
 		})
 	})
+})
+
+app.get("/qrcodes", function (req, res) {
+	zipFile = archiver("zip")
+	zipFile.directory("qrcodes")
+
+	zipFile.pipe(res)	
+	res.on('close', function () {
+		res.send(200)
+	})
+	zipFile.finalize()
+
 })
 
 function getAllSoldiers (cb) {
