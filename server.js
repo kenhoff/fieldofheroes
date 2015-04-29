@@ -55,10 +55,13 @@ app.get("/generate", timeout("600s"), function (req, res) {
 
 app.get("/qrcodes", function (req, res) {
 	zipFile = archiver("zip")
+	console.log("created empty zipfile")
 	zipFile.directory("qrcodes")
+	console.log("put qr codes in zipfile")
 
-	zipFile.pipe(res)	
-	res.on('close', function () {
+	console.log("piping zipfile")
+	zipFile.pipe(res).on('close', function () {
+		console.log("done piping zipfile")
 		res.send(200)
 	})
 	zipFile.finalize()
