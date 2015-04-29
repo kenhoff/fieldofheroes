@@ -8,6 +8,7 @@ qr = require("qr-image")
 fs = require("graceful-fs")
 archiver = require("archiver")
 mkdirp = require("mkdirp")
+timeout = require("connect-timeout")
 
 BasicHttpBinding = require("wcf.js").BasicHttpBinding
 Proxy = require('wcf.js').Proxy
@@ -29,7 +30,7 @@ app.get("/", function (req, res) {
 
 })
 
-app.get("/qrcodes", function (req, res) {
+app.get("/qrcodes", timeout("600s"), function (req, res) {
 	getAllSoldiers(function (heroesList) {
 		//loop through soldiers
 		mkdirp(__dirname + "/qrcodes", function (err) {
