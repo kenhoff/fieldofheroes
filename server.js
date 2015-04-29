@@ -7,6 +7,7 @@ request = require("request")
 qr = require("qr-image")
 fs = require("fs")
 archiver = require("archiver")
+mkdirp = require("mkdirp")
 
 BasicHttpBinding = require("wcf.js").BasicHttpBinding
 Proxy = require('wcf.js').Proxy
@@ -31,32 +32,32 @@ app.get("/", function (req, res) {
 app.get("/qrcodes", function (req, res) {
 	getAllSoldiers(function (heroesList) {
 		//loop through soldiers
-		async.map(heroesList.slice(0,10), function (hero, cb){
-			console.log("generating qr code for:", hero)
-			generateQrCode(hero.hash, function (qrCode) {
-				// TODO use mkdirp to create qrcodes directory
-				qrPipe = qrCode.pipe(fs.createWriteStream(__dirname + "/qrcodes/" + hero.hash + ".png"))
-				console.log("qrpipe created")
-				qrPipe.on('close', function () {
-					console.log("pipe finished")
-					cb(null)
+		mkdirp(__dirname + "/qrcodes", function (err) {
+			if (err) { console.log(err) }
+			async.map(heroesList.slice(0,10), function (hero, cb){
+				console.log("generating qr code for:", hero)
+				generateQrCode(hero.hash, function (qrCode) {
+					// TODO use mkdirp to create qrcodes directory
+					qrPipe = qrCode.pipe(fs.createWriteStream(__dirname + "/qrcodes/" + hero.hash + ".png"))
+					console.log("qrpipe created")
+					qrPipe.on('close', function () {
+						console.log("pipe finished")
+						cb(null)
+					})
 				})
-			})
-		}, function (err, results) {
-			console.log(__dirname + "/qrcodes.zip")
-			zipFile = archiver("zip")
-			zipFile.directory("qrcodes")
+			}, function (err, results) {
+				console.log(__dirname + "/qrcodes.zip")
+				zipFile = archiver("zip")
+				zipFile.directory("qrcodes")
 
-			zipFile.pipe(res)	
-			res.on('close', function () {
-				res.send(200)
+				zipFile.pipe(res)	
+				res.on('close', function () {
+					res.send(200)
+				})
+				zipFile.finalize()
+				
 			})
-			zipFile.finalize()
-			
 		})
-		//call qr code gen on each soldier, with each callback saving to file
-		//once complete, response 200
-		//res.render("allHeroes", {heroesList: heroesList})
 	})
 })
 
