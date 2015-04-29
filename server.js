@@ -6,6 +6,7 @@ sanitizeHtml = require("sanitize-html")
 request = require("request")
 qr = require("qr-image")
 fs = require("fs")
+archiver = require("archiver")
 
 BasicHttpBinding = require("wcf.js").BasicHttpBinding
 Proxy = require('wcf.js').Proxy
@@ -43,7 +44,14 @@ app.get("/qrcodes", function (req, res) {
 			})
 		}, function (err, results) {
 			console.log(__dirname + "/qrcodes.zip")
-			res.send(200)
+			zipFile = archiver("zip")
+			zipFile.directory("qrcodes")
+
+			zipFile.pipe(res)	
+			res.on('close', function () {
+				res.send(200)
+			})
+			zipFile.finalize()
 			
 		})
 		//call qr code gen on each soldier, with each callback saving to file
