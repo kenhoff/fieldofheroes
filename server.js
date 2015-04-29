@@ -5,7 +5,7 @@ bodyParser = require("body-parser")
 sanitizeHtml = require("sanitize-html")
 request = require("request")
 qr = require("qr-image")
-fs = require("fs")
+fs = require("graceful-fs")
 archiver = require("archiver")
 mkdirp = require("mkdirp")
 
@@ -34,10 +34,10 @@ app.get("/qrcodes", function (req, res) {
 		//loop through soldiers
 		mkdirp(__dirname + "/qrcodes", function (err) {
 			if (err) { console.log(err) }
-			async.map(heroesList.slice(0,10), function (hero, cb){
+			//async.map(heroesList.slice(0,100), function (hero, cb){
+			async.mapLimit(heroesList, 1, function (hero, cb){
 				console.log("generating qr code for:", hero)
 				generateQrCode(hero.hash, function (qrCode) {
-					// TODO use mkdirp to create qrcodes directory
 					qrPipe = qrCode.pipe(fs.createWriteStream(__dirname + "/qrcodes/" + hero.hash + ".png"))
 					console.log("qrpipe created")
 					qrPipe.on('close', function () {
@@ -46,6 +46,7 @@ app.get("/qrcodes", function (req, res) {
 					})
 				})
 			}, function (err, results) {
+				console.log("done generating qr codes")
 				console.log(__dirname + "/qrcodes.zip")
 				zipFile = archiver("zip")
 				zipFile.directory("qrcodes")
