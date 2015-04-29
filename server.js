@@ -35,7 +35,7 @@ app.get("/qrcodes", function (req, res) {
 		mkdirp(__dirname + "/qrcodes", function (err) {
 			if (err) { console.log(err) }
 			//async.map(heroesList.slice(0,100), function (hero, cb){
-			async.mapLimit(heroesList, 1, function (hero, cb){
+			async.mapLimit(heroesList, 10, function (hero, cb){
 				console.log("generating qr code for:", hero)
 				generateQrCode(hero.hash, function (qrCode) {
 					qrPipe = qrCode.pipe(fs.createWriteStream(__dirname + "/qrcodes/" + hero.hash + ".png"))
