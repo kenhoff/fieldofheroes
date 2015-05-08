@@ -31,12 +31,13 @@ app.get("/", function (req, res) {
 })
 
 app.get("/generate", timeout("600s"), function (req, res) {
+	res.send(200)
 	getAllSoldiers(function (heroesList) {
 		//loop through soldiers
 		mkdirp(__dirname + "/qrcodes", function (err) {
 			if (err) { console.log(err) }
-			//async.map(heroesList.slice(0,100), function (hero, cb){
-			async.mapLimit(heroesList, 10, function (hero, cb){
+			async.mapLimit(heroesList.slice(0,10), 10, function (hero, cb){
+			//async.mapLimit(heroesList, 10, function (hero, cb){
 				console.log("generating qr code for:", hero)
 				generateQrCode(hero.hash, function (qrCode) {
 					qrPipe = qrCode.pipe(fs.createWriteStream(__dirname + "/qrcodes/" + hero.hash + ".png"))
@@ -48,23 +49,30 @@ app.get("/generate", timeout("600s"), function (req, res) {
 				})
 			}, function (err, results) {
 				console.log("done generating qr codes")
+				zipFile = archiver("zip")
+
+				output = fs.createWriteStream(__dirname + "/qrcodes.zip")
+				console.log("created write stream")
+				output.on('close', function () {
+					console.log("output closed")
+				})
+				console.log("created close event callback")
+
+
+				zipFile.pipe(output)
+				console.log("told zipfile to pipe to output")
+
+
+				zipFile.bulk([{src: ["qrcodes/*.png"]}]).finalize()
+				console.log("told zipfile to zip qrcodes directory and finalize")
+
 			})
 		})
 	})
 })
 
 app.get("/qrcodes", function (req, res) {
-	zipFile = archiver("zip")
-	console.log("created empty zipfile")
-	zipFile.directory("qrcodes")
-	console.log("put qr codes in zipfile")
-
-	console.log("piping zipfile")
-	zipFile.pipe(res).on('close', function () {
-		console.log("done piping zipfile")
-		res.send(200)
-	})
-	zipFile.finalize()
+	res.sendFile(__dirname + "/qrcodes.zip")
 
 })
 
@@ -82,6 +90,7 @@ function getAllSoldiers (cb) {
 				heroes = result['s:Envelope']["s:Body"][0]["GetAllHeroPairsResponse"][0]["GetAllHeroPairsResult"][0]["a:HeroPair"]
 				heroesList = []
 				for (i = 0; i < heroes.length; i++) {
+					//console.log(heroes[i])
 					heroesList.push( {
 						name: heroes[i]["a:Name"][0],
 						hash: heroes[i]["a:NameHashd"][0]
