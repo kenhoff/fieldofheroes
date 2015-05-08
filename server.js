@@ -127,9 +127,9 @@ app.get("/:heroId", function (req, res) {
 
 	message = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><GetRecordFromNameHash xmlns="http://tempuri.org/"><namehash>' + sanitizeHtml(req.params.heroId) + '</namehash></GetRecordFromNameHash></s:Body></s:Envelope>'
 	proxy.send(message, "http://tempuri.org/IService1/GetRecordFromNameHash", function(response, ctx) {
-		//console.log(ctx.statusCode)
+		console.log(ctx.statusCode)
 		if (ctx.statusCode == 500) {
-			res.send(500)
+			res.sendStatus(500)
 		}
 		else {
 			parseString(response, function (err, result){
@@ -144,9 +144,9 @@ app.get("/:heroId", function (req, res) {
 						newKey = keys[i].replace("a:", "")
 						newSoldier[newKey] = soldier[keys[i]][0]
 					}
-					delete newSoldier['CustomURL']
+					//delete newSoldier['CustomURL']
 					newSoldier["DateOfDeath"] = (new Date(Date.parse(newSoldier["DateOfDeath"]))).toDateString()
-					//console.log(newSoldier)
+					console.log(newSoldier)
 					res.render("hero", newSoldier)
 				}
 			})
