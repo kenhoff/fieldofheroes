@@ -36,11 +36,26 @@ app.get("/generate", timeout("600s"), function (req, res) {
 		//loop through soldiers
 		mkdirp(__dirname + "/qrcodes", function (err) {
 			if (err) { console.log(err) }
-			async.mapLimit(heroesList.slice(0,10), 10, function (hero, cb){
+			async.mapLimit(heroesList.slice(0,10000), 10, function (hero, cb){
 			//async.mapLimit(heroesList, 10, function (hero, cb){
 				console.log("generating qr code for:", hero)
 				generateQrCode(hero.hash, function (qrCode) {
-					qrPipe = qrCode.pipe(fs.createWriteStream(__dirname + "/qrcodes/" + hero.hash + ".png"))
+					initialDateString = hero.DoD.split(" ")[0].split("/")
+					year = initialDateString[2]
+					day = initialDateString[1]
+					if (day <= 9) {
+						day = "0" + day
+					}
+					month = initialDateString[0]
+					if (month <= 9) {
+						month = "0" + month
+					}
+					dateString = [year, month, day].join("-")
+					lastNameString = hero.name.split(",")[0]
+
+					fileString = dateString + "-" + lastNameString
+					console.log(fileString)
+					qrPipe = qrCode.pipe(fs.createWriteStream(__dirname + "/qrcodes/" + fileString + ".png"))
 					console.log("qrpipe created")
 					qrPipe.on('close', function () {
 						console.log("pipe finished")
@@ -83,7 +98,7 @@ function getAllSoldiers (cb) {
 		//console.log(ctx.statusCode)
 		//console.log(response)
 		if (ctx.statusCode == 500) {
-			res.send(500)
+			res.sendStatus(500)
 		}
 		else {
 			parseString(response, function (err, result){
@@ -93,7 +108,8 @@ function getAllSoldiers (cb) {
 					//console.log(heroes[i])
 					heroesList.push( {
 						name: heroes[i]["a:Name"][0],
-						hash: heroes[i]["a:NameHashd"][0]
+						hash: heroes[i]["a:NameHashd"][0],
+						DoD: heroes[i]["a:DoD"][0]
 					})
 				}
 				//console.log(heroesList)
@@ -104,7 +120,7 @@ function getAllSoldiers (cb) {
 }
 
 app.get("/favicon.ico", function (req, res) {
-	res.send(200)
+	res.sendStatus(200)
 })
 
 app.get("/:heroId", function (req, res) {
