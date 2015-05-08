@@ -147,7 +147,7 @@ app.get("/:heroId", function (req, res) {
 					//delete newSoldier['CustomURL']
 					newSoldier["DateOfDeath"] = (new Date(Date.parse(newSoldier["DateOfDeath"]))).toDateString()
 					console.log(newSoldier)
-					if (newSoldier["CustomPage"] == "true") {
+					if ((newSoldier["CustomPage"] == "true") && (newSoldier["CustomURL"] != "")) {
 						console.log("redirecting to", newSoldier["CustomURL"])
 						res.redirect(newSoldier["CustomURL"])
 					}
