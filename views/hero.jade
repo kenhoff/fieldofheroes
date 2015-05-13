@@ -27,7 +27,10 @@ body
 				h4 #{Unit}
 				br
 				h4 Deceased #{DateOfDeath}
-				h4 #{CasualtyCity}, #{CasualtyCountry}
+				if CasualtyCity
+					h4 #{CasualtyCity}, #{CasualtyCountry}
+				else
+					h4 #{CasualtyCountry}
 				br
 		.row
 			.col-sm-12
