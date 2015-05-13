@@ -43,8 +43,8 @@ app.get("/generate", timeout("600s"), function (req, res) {
 			if (err) { console.log(err) }
 			async.mapLimit(heroesList.slice(0,10000), 10, function (hero, cb){
 			//async.mapLimit(heroesList, 10, function (hero, cb){
-				console.log("generating qr code for:", hero)
 				url = req.protocol + '://' + req.get('host') + "/" + hero.hash
+				console.log("generating qr code:", url)
 				generateQrCode(url, function (qrCode) {
 					initialDateString = hero.DoD.split(" ")[0].split("/")
 					year = initialDateString[2]
