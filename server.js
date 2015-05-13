@@ -9,6 +9,8 @@ fs = require("graceful-fs")
 archiver = require("archiver")
 mkdirp = require("mkdirp")
 timeout = require("connect-timeout")
+favicon = require("serve-favicon")
+
 
 BasicHttpBinding = require("wcf.js").BasicHttpBinding
 Proxy = require('wcf.js').Proxy
@@ -22,6 +24,8 @@ app.set("view engine", "jade")
 
 app.use(bodyParser.urlencoded({extended:false}))
 
+app.use(favicon(__dirname + "/favicon.ico"))
+
 app.get("/", function (req, res) {
 	
 	getAllSoldiers(function (heroesList) {
@@ -29,6 +33,7 @@ app.get("/", function (req, res) {
 	})
 
 })
+
 
 app.get("/generate", timeout("600s"), function (req, res) {
 	res.send(200)
@@ -120,9 +125,6 @@ function getAllSoldiers (cb) {
 	})
 }
 
-app.get("/favicon.ico", function (req, res) {
-	res.sendStatus(200)
-})
 
 app.get("/:heroId", function (req, res) {
 
