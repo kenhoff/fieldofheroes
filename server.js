@@ -39,7 +39,8 @@ app.get("/generate", timeout("600s"), function (req, res) {
 			async.mapLimit(heroesList.slice(0,10000), 10, function (hero, cb){
 			//async.mapLimit(heroesList, 10, function (hero, cb){
 				console.log("generating qr code for:", hero)
-				generateQrCode(hero.hash, function (qrCode) {
+				url = "http://fieldofheroesweb.azurewebsites.net/" + hero.hash
+				generateQrCode(url, function (qrCode) {
 					initialDateString = hero.DoD.split(" ")[0].split("/")
 					year = initialDateString[2]
 					day = initialDateString[1]
@@ -167,15 +168,17 @@ app.get("/img/:heroid", function (req, res) {
 
 
 app.get("/qr/:heroID", function (req, res) {
-	heroID = req.params.heroID
 
-	generateQrCode (heroID, function (qrCode) {
+	heroID = req.params.heroID
+	url = req.protocol + '://' + req.get('host') + "/" + heroID
+	
+	generateQrCode (url, function (qrCode) {
 		qrCode.pipe(res)
 	})
 })
 
-function generateQrCode (heroID, cb) {
-	qr_code = qr.image("http://fieldofheroesweb.azurewebsites.net/" + heroID, {type: "png"})
+function generateQrCode (url, cb) {
+	qr_code = qr.image(url, {type: "png"})
 	cb(qr_code)
 }
 
