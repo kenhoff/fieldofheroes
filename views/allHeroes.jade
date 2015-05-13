@@ -8,8 +8,10 @@ head
 		a {
 			color: inherit
 		}
+	title Field of Heroes
 body
 	.container
+		h1.page-header Field of Heroes
 		each hero in heroesList
 			p: a(href = "/#{hero.hash}") #{hero.name}
 
